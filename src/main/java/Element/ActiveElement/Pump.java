@@ -33,15 +33,21 @@ public class Pump implements ActiveElement{
         if(source.isFull()) {
             source.empty();
             if(isBroken) {
+                // If source is full and pump is broken, water flows into tank
                 addToTank();
                 output.flow(null);
             }else {
+                // If source is full and pump is not broken, water flows into next pipe
                 output.flow(this);
             }
         }else {
-            if(isTankEmpty()) {
+            if(isTankEmpty() || !isBroken) {
+                // If source is empty and either tank is also empty or is broken,
+                // water does not flow into next pipe
                 output.flow(null);
             }else {
+                // If source is empty, tank is not empty and not broken,
+                // water in the tank flows into next pipe
                 removeFromTank();
                 output.flow(this);
             }

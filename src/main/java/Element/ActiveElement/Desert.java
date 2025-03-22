@@ -22,6 +22,7 @@ public class Desert implements ActiveElement {
         if(source == null) throw new IllegalArgumentException();
         if(source.isFull()) {
             water++;
+            source.empty();
         }
     }
 

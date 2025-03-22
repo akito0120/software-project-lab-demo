@@ -37,10 +37,14 @@ public class Game {
 
         for(var plumber: plumbers) {
             plumberPriorityQueue.offer(plumber);
+
+            // Plumbers are initially on the cistern
             plumber.setPosition(grid.getCistern());
         }
         for(var saboteur: saboteurs) {
             saboteurQueue.offer(saboteur);
+
+            // Saboteurs are initially on the spring
             saboteur.setPosition(grid.getSpring());
         }
 
@@ -74,6 +78,38 @@ public class Game {
         }else {
             System.out.println("Winner: Saboteurs");
         }
+    }
+
+    // Called when the turn starts
+    private void postTurnProcess() {
+        grid.calculateWaterFlow();
+        System.out.println("Plumbers' Score: " + grid.getPlumberScore());
+        System.out.println("Saboteur's Score: " + grid.getSaboteurScore());
+    }
+
+    // Called when the turn ends
+    private void preTurnProcess() {
+        Cistern cistern = grid.getCistern();
+        cistern.manufacturePipe(grid.getDesert());
+        cistern.manufacturePump();
+
+        if(!grid.getPumps().isEmpty()) {
+            Random random = new Random();
+            int num = random.nextInt(100);
+            List<Pump> pumps = grid.getPumps();
+            if(num < 30) {
+                int index = random.nextInt(pumps.size());
+                Pump pump = pumps.get(index);
+                if(!pump.isBroken()) {
+                    pump.breakPump();
+                    System.out.println(pumps.get(index).getName() + " was broken");
+                }
+            }
+        }
+    }
+
+    private void printSeparator() {
+        System.out.println("====================================================");
     }
 
     public void turn(Plumber plumber) {
@@ -156,33 +192,27 @@ public class Game {
         postTurnProcess();
     }
 
+    // Move
     private void move(Player player) {
         Scanner scanner = new Scanner(System.in);
         Element position = player.getPosition();
         List<Element> neighbors = position.getNeighbors();
 
+        // List the neighbors to which the player can move
         for(int i = 0; i < neighbors.size(); i++) {
             System.out.println("    [" + i + "]" + neighbors.get(i).getName());
         }
 
+        // Read user input
         int index = scanner.nextInt();
         scanner.nextLine();
+
         if(0 <= index && index < neighbors.size()) {
             Element target = neighbors.get(index);
 
-            if (target instanceof Pipe) {
-                for (var p : plumbers) {
-                    if (p.getPosition().equals(target)) {
-                        System.out.println(p.getName() + " is already standing on" + target.getName());
-                        return;
-                    }
-                }
-                for (var s : saboteurs) {
-                    if (s.getPosition().equals(target)) {
-                        System.out.println(s.getName() + " is already standing on" + target.getName());
-                        return;
-                    }
-                }
+            if (target instanceof Pipe pipe) {
+                // If the target is Pipe, check if nobody is standing on it
+                if(isOccupied(pipe)) return;
             }
 
             player.setPosition(target);
@@ -190,27 +220,51 @@ public class Game {
         }
     }
 
+    // Return if there is a player standing on given pipe
+    private boolean isOccupied(Pipe pipe) {
+        for (var p : plumbers) {
+            if (p.getPosition().equals(pipe)) {
+                System.out.println(p.getName() + " is already standing on" + pipe.getName());
+                return true;
+            }
+        }
+        for (var s : saboteurs) {
+            if (s.getPosition().equals(pipe)) {
+                System.out.println(s.getName() + " is already standing on" + pipe.getName());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Fix pipe or pump
     private void fix(Plumber plumber) {
         Element position = plumber.getPosition();
         if(position instanceof Pipe pipe) {
             if(pipe.isPunctured()) {
+                // If the target is a pipe and is punctured, fix it
                 pipe.fix();
                 System.out.println(plumber.getName() + " fixed " + pipe.getName());
             }else {
+                // If the target is a pipe and is not punctured, do nothing
                 System.out.println(pipe.getName() + " is not punctured");
             }
         }else if(position instanceof Pump pump) {
             if(pump.isBroken()) {
+                // If target is a pump and is broken, fix it
                 pump.fix();
                 System.out.println(plumber.getName() + " fixed " + pump.getName());
             }else {
+                // If target is a pump and is not broken, do nothing
                 System.out.println(pump.getName() + " is not broken");
             }
         }else {
+            // If target is not a fixable element, do nothing
             System.out.println(plumber.getName() + " is standing on neither a pipe nor a pump");
         }
     }
 
+    // Get pipe or pump from cistern
     private void get(Plumber plumber) {
         Scanner scanner = new Scanner(System.in);
         Element position = plumber.getPosition();
@@ -251,6 +305,8 @@ public class Game {
             if(pipe == null) {
                 System.out.println(plumber.getName() + " doesn't have a pipe");
             }else {
+                // When the player is standing on a spring,
+                // the other end can be either the cistern or a pump
                 System.out.println("    [0]" + grid.getCistern().getName());
                 List<Pump> pumps = grid.getPumps();
                 for(int i = 0; i < pumps.size(); i++) {
@@ -293,10 +349,13 @@ public class Game {
                 if(pipe == null) {
                     System.out.println(plumber.getName() + "doesn't have a pipe");
                 }else {
+                    // When the player is standing on a pump,
+                    // the other end can be cistern, spring or another pump
                     System.out.println("    [0]" + grid.getCistern().getName());
+                    System.out.println("    [1]" + grid.getSpring().getName());
                     List<Pump> pumps = grid.getPumps();
                     for(int i = 0; i < pumps.size(); i++) {
-                        System.out.println("    [" + (i + 1) + "]" + pumps.get(i).getName());
+                        System.out.println("    [" + (i + 2) + "]" + pumps.get(i).getName());
                     }
 
                     int index = scanner.nextInt();
@@ -313,9 +372,11 @@ public class Game {
                         pipe.connectOutput(cistern);
 
                         System.out.println(plumber.getName() + " connected " + sourcePump.getName() + " to " + cistern.getName());
-                    }else if(1 <= index && index <= pumps.size()){
+                    }else if(index == 1) {
+                        // TODO Spring -> Pipe -> Pump
+                    } else if(2 <= index && index <= pumps.size() + 1){
                         // Pump -> Pipe -> Pump
-                        Pump pump = pumps.get(index - 1);
+                        Pump pump = pumps.get(index - 2);
                         if(pump.hasConnectionCapacity()) {
                             sourcePump.connectOutput(pipe);
                             pipe.connectInput(sourcePump);
@@ -337,25 +398,35 @@ public class Game {
     private void insertPump(Plumber plumber) {
         Element position = plumber.getPosition();
         if(position instanceof Pipe pipe) {
+            // Pump can only be inserted in the middle of a pipe
+
             Pump pump = plumber.usePump();
             if(pump == null) {
                 System.out.println(plumber.getName() + " doesn't have a pump");
                 return;
             }
 
+            // Before: Input -> OldPipe -> Output
+            // After: Input -> OldPipe -> Pump -> NewPipe -> Output
+
+            // Output
             ActiveElement output = pipe.getOutput();
 
+            // Set the output of the existing pipe to the pump
             pipe.connectOutput(pump);
             pump.connectInput(pipe);
 
+            // Create new pipe and connect the pump with original output of the existing pipe
             Pipe newPipe = new Pipe(grid.getDesert());
             pump.connectOutput(newPipe);
             newPipe.connectInput(pump);
             output.connectInput(newPipe);
             newPipe.connectOutput(output);
 
+            // Set the position of the plumber to the pump
             plumber.setPosition(pump);
 
+            // Add pump to the grid
             grid.addPump(pump);
 
             System.out.println(plumber.getName() + " inserted " + pump.getName() + " on " + pipe.getName());
@@ -472,35 +543,5 @@ public class Game {
 
     private void position(Player player) {
         System.out.println(player.getPosition().getName());
-    }
-
-    private void preTurnProcess() {
-        Cistern cistern = grid.getCistern();
-        cistern.manufacturePipe(grid.getDesert());
-        cistern.manufacturePump();
-
-        if(!grid.getPumps().isEmpty()) {
-            Random random = new Random();
-            int num = random.nextInt(100);
-            List<Pump> pumps = grid.getPumps();
-            if(num < 30) {
-                int index = random.nextInt(pumps.size());
-                Pump pump = pumps.get(index);
-                if(!pump.isBroken()) {
-                    pump.breakPump();
-                    System.out.println(pumps.get(index).getName() + " was broken");
-                }
-            }
-        }
-    }
-
-    private void postTurnProcess() {
-        grid.calculateWaterFlow();
-        System.out.println("Plumbers' Score: " + grid.getPlumberScore());
-        System.out.println("Saboteur's Score: " + grid.getSaboteurScore());
-    }
-
-    private void printSeparator() {
-        System.out.println("================================================");
     }
 }

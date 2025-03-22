@@ -24,8 +24,10 @@ public class Cistern implements ActiveElement{
     public void flow(Pipe source) throws IllegalArgumentException {
         if(source == null) throw new IllegalArgumentException();
         if(!inputs.contains(source)) throw new IllegalArgumentException();
+
         if(source.isFull()) {
             water++;
+            source.empty();
         }
     }
 
