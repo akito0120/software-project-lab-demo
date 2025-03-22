@@ -20,10 +20,6 @@ public class Cistern implements ActiveElement{
         this.name = "Cistern-" + UUID.randomUUID();
     }
 
-    public int getWater() {
-        return water;
-    }
-
     @Override
     public void flow(Pipe source) throws IllegalArgumentException {
         if(source == null) throw new IllegalArgumentException();
@@ -31,30 +27,6 @@ public class Cistern implements ActiveElement{
         if(source.isFull()) {
             water++;
         }
-    }
-
-    public void manufacturePipe(Desert desert) {
-        pipes.add(new Pipe(desert));
-    }
-
-    public void manufacturePump() {
-        pumps.add(new Pump());
-    }
-
-    public boolean hasPipe() {
-        return !pipes.isEmpty();
-    }
-
-    public boolean hasPump() {
-        return !pumps.isEmpty();
-    }
-
-    public Pipe getPipe() {
-        return pipes.poll();
-    }
-
-    public Pump getPump() {
-        return pumps.poll();
     }
 
     @Override
@@ -86,5 +58,33 @@ public class Cistern implements ActiveElement{
     @Override
     public void disconnectOutput(Pipe output) {
         return;
+    }
+
+    public int getWater() {
+        return water;
+    }
+
+    public void manufacturePipe(Desert desert) {
+        pipes.add(new Pipe(desert));
+    }
+
+    public void manufacturePump() {
+        pumps.add(new Pump());
+    }
+
+    public boolean hasPipe() {
+        return !pipes.isEmpty();
+    }
+
+    public boolean hasPump() {
+        return !pumps.isEmpty();
+    }
+
+    public Pipe getPipe() {
+        return pipes.poll();
+    }
+
+    public Pump getPump() {
+        return pumps.poll();
     }
 }

@@ -22,14 +22,6 @@ public class Pump implements ActiveElement{
         neighbors = new HashSet<>();
     }
 
-    public void breakPump() {
-        isBroken = true;
-    }
-
-    public void fix() {
-        isBroken = false;
-    }
-
     @Override
     public void flow(Pipe source) throws IllegalArgumentException {
         if(source == null) throw new IllegalArgumentException("The source is null");
@@ -54,6 +46,36 @@ public class Pump implements ActiveElement{
                 output.flow(this);
             }
         }
+    }
+
+    @Override
+    public List<Element> getNeighbors() {
+        return new LinkedList<>(neighbors);
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void disconnectInput(Pipe input) {
+        if(input.equals(this.input)) return;
+        neighbors.remove(input);
+    }
+
+    @Override
+    public void disconnectOutput(Pipe output) {
+        if(output.equals(this.output)) return;
+        neighbors.remove(output);
+    }
+
+    public void breakPump() {
+        isBroken = true;
+    }
+
+    public void fix() {
+        isBroken = false;
     }
 
     private boolean isTankEmpty() {
@@ -104,29 +126,7 @@ public class Pump implements ActiveElement{
         return output;
     }
 
-    @Override
-    public List<Element> getNeighbors() {
-        return new LinkedList<>(neighbors);
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
     public boolean isBroken() {
         return isBroken;
-    }
-
-    @Override
-    public void disconnectInput(Pipe input) {
-        if(input.equals(this.input)) return;
-        neighbors.remove(input);
-    }
-
-    @Override
-    public void disconnectOutput(Pipe output) {
-        if(output.equals(this.output)) return;
-        neighbors.remove(output);
     }
 }

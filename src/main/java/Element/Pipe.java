@@ -20,6 +20,28 @@ public class Pipe implements Element {
         name = "Pipe-" + UUID.randomUUID();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Pipe pipe) {
+            return this.name.equals(pipe.getName());
+        }else {
+            return false;
+        }
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public List<Element> getNeighbors() {
+        List<Element> neighbors = new LinkedList<>();
+        neighbors.add(input);
+        neighbors.add(output);
+        return neighbors;
+    }
+
     public void puncture() {
         this.isPunctured = true;
         isFull = false;
@@ -47,19 +69,6 @@ public class Pipe implements Element {
         output.flow(this);
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public List<Element> getNeighbors() {
-        List<Element> neighbors = new LinkedList<>();
-        neighbors.add(input);
-        neighbors.add(output);
-        return neighbors;
-    }
-
     public void connectInput(ActiveElement input) {
         this.input = input;
     }
@@ -78,15 +87,6 @@ public class Pipe implements Element {
 
     public ActiveElement getOutput() {
         return output;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if(obj instanceof Pipe pipe) {
-            return this.name.equals(pipe.getName());
-        }else {
-            return false;
-        }
     }
 }
 
