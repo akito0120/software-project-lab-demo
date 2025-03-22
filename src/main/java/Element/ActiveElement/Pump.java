@@ -26,8 +26,6 @@ public class Pump implements ActiveElement{
     public void flow(Pipe source) throws IllegalArgumentException {
         if(source == null) throw new IllegalArgumentException("The source is null");
         if(!input.equals(source)) {
-            System.err.println("Input: " + input.getName());
-            System.err.println("Source: " + source.getName());
             return;
         }
         if(source.isFull()) {
