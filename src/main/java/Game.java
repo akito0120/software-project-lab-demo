@@ -12,13 +12,13 @@ import java.util.*;
 
 public class Game {
     private final Grid grid;
-    Set<Plumber> plumbers;
-    Set<Saboteur> saboteurs;
+    List<Plumber> plumbers;
+    List<Saboteur> saboteurs;
 
     Game() {
         this.grid = new Grid();
-        this.plumbers = new HashSet<>();
-        this.saboteurs = new HashSet<>();
+        this.plumbers = new LinkedList<>();
+        this.saboteurs = new LinkedList<>();
     }
 
     public void addPlayer(Plumber plumber) {
