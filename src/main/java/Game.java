@@ -373,22 +373,27 @@ public class Game {
 
                         System.out.println(plumber.getName() + " connected " + sourcePump.getName() + " to " + cistern.getName());
                     }else if(index == 1) {
-                        // TODO Spring -> Pipe -> Pump
+                        // Spring -> Pipe -> Pump
+                        Spring spring = grid.getSpring();
+
+                        spring.connectOutput(pipe);
+                        pipe.connectInput(spring);
+                        sourcePump.connectInput(pipe);
+                        pipe.connectOutput(sourcePump);
                     } else if(2 <= index && index <= pumps.size() + 1){
                         // Pump -> Pipe -> Pump
                         Pump pump = pumps.get(index - 2);
-                        if(pump.hasConnectionCapacity()) {
-                            sourcePump.connectOutput(pipe);
-                            pipe.connectInput(sourcePump);
 
-                            pump.connectInput(pipe);
-                            pipe.connectOutput(pump);
-                            System.out.println(plumber.getName() + " connected " + sourcePump.getName() + " to " + pump.getName());
-                        }else {
-                            System.out.println(pump.getName() + "has no more connection capacity");
-                        }
+                        sourcePump.connectOutput(pipe);
+                        pipe.connectInput(sourcePump);
+                        pump.connectInput(pipe);
+                        pipe.connectOutput(pump);
+
+                        System.out.println(plumber.getName() + " connected " + sourcePump.getName() + " to " + pump.getName());
                     }
                 }
+            }else {
+                System.out.println(sourcePump.getName() + "has no more connection capacity");
             }
         }else {
             System.out.println(plumber.getName() + " is not standing on an active element");
